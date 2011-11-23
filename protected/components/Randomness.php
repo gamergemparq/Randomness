@@ -33,7 +33,7 @@ class Randomness extends CApplicationComponent
 		// gather the current time's microsecond part
 		$r[] =substr(microtime(), 2, 6);
 
-		// concatenate everything gathered, mixit with sha 512 and convert that
+		// concatenate everything gathered, mix it with sha 512 and convert that
 		// to a string of bytes
 		$r = str_split(hash('sha512', implode($r)), 8);
 		$s = '';
@@ -104,7 +104,8 @@ class Randomness extends CApplicationComponent
 	}
 
 	/**
-	 * Generate a random ASCII string using only [0-9a-zA-z~.]
+	 * Generate a random ASCII string using only [0-9a-zA-z~.] (which are all
+	 * transparent in urlencoding.
 	 * @param int $length length of the string in characters
 	 * @return string the random string
 	 */

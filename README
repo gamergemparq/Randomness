@@ -11,26 +11,25 @@ You cannot rely on a user to use a (practically) unguessable password or to not
 use that password in systems other than yours. And you should not assume that
 your server is so secure that an attacker cannot get hold of the password file.
 
-So you use a salt to ensure that the password value to be hashed is unlikely to
-appear in any dictionary or rainbow. But this is not enough. First, the  salt
-has to be really random. Second, the hash function needs to be slow to calculate
-(computationally expensive, as the techies say).
+So you use a salt to ensure that the hash is unlikely to appear in any
+dictionary or rainbow. But this is not enough. First, the salt has to be really
+random. Second, the hash function needs to be slow to calculate (computationally
+expensive, as the techies say).
 
-Frist problem: a common mistake is to generate salts with mt_rand or similar.
+Frist problem: a common mistake is to generate salts with mt_rand() or similar.
 That's no use because mt_rand is a simple pseudo-random number gnerator designed
-for use in Monte Carlo simulations, not in security systems. It fails to meet
-the requirements of a "cryptographically secure pseudo random number generator"
-(CSPRNG) you can determine the next random number from previous ones or from
-knowing the internal state of the generator.
+for use in Monte Carlo simulations, not in security systems. It is not
+cryptographically secure (not a CSPRNG). You can determine the next random
+number from previous ones or from knowing the internal state of the generator.
 
 Randomness uses the operating system's CSPRNG if it can. If it can't, it logs
 a warning and falls back to something less secure. In the case that neither
 openssl_random_pseudo_bytes() nor /dev/random work it falls back on its own
-own stupid tricks to shuffle things up.
+own stupid tricks to shuffle things up (read the code).
 
 In most decent production environments, be it Windows, Unix or Linux, Randomness
 will return a good, CS random value and not use any hackery. But test it out to
-see how it works for you by checking your logs.
+see how it works for you by checking your logs (Yii logs, not PHP error log).
 
 The second problem is fast hashes. MD5, for example, is very fast. As of Nov
 2011 you can check 350 million keys per second on a commodity nVidia processor.
