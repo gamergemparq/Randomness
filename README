@@ -53,15 +53,15 @@ Randomness::blowfishSalt() generates a salt to use with crypt(), for example:
 
 To authenticate:
 
-	public function authenticate() {
-		$user = User::model()->findByAttributes(array(
-		    'email' => $this->username,
-		));
-		if ($user === null
-			|| crypt($this->password, $user->bf_hash) !== $user->bf_hash
-		)
-			$this->errorCode = self::ERROR_UNKNOWN_IDENTITY;
-		...
+    public function authenticate() {
+        $user = User::model()->findByAttributes(array(
+            'email' => $this->username,
+        ));
+        if ($user === null
+            || crypt($this->password, $user->bf_hash) !== $user->bf_hash
+        )
+            $this->errorCode = self::ERROR_UNKNOWN_IDENTITY;
+        ...
 
 Some people advocate resalting every time a user logs in. I think this is only
 useful if you also limit the time interval between user logins, e.g. block an
