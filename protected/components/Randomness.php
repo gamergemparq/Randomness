@@ -50,6 +50,7 @@ class Randomness extends CApplicationComponent
 	 * @return string the random binary string
 	 */
 	public static function randomBytes($length = 8, $http = false) {
+		$s = '';
 		$f = @fopen('/dev/random', 'r');
 		if (function_exists('openssl_random_pseudo_bytes')) {
 			$s = openssl_random_pseudo_bytes($length, $safe);
