@@ -1,3 +1,11 @@
+***NOTE to XAMPP users on Windows:
+It seems XAMPP comes with openssl but you might need to configure it before it
+will work. You should do this before using randomness. Take a look at:
+xampp\php\extras\openssl\README-SSL.txt
+
+randomness
+==========
+
 The Yii application component in protected/components provides four handy
 helper functions for using in web apps that need to handle passwords.
 
