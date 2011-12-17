@@ -2,7 +2,13 @@
 
 class Randomness extends CApplicationComponent
 {
-
+/*
+ * chgrp, diskfreespace, disk_free_space, disk_total_space, dl, exec, getmyuid, getrusage,
+ * get_current_use, highlight_file, ini_alter, ini_get_all, ini_restore, leak, link,
+ *  mysql_list_dbs, passthru, pclose, pfsockopen, popen, posix_kill, posix_mkfifo,
+ * posix_setpgid, posix_setsid, posix_setuid, proc_close, proc_get_status, proc_nice,
+ * proc_open, proc_terminate, setlimit, shell_exec, show_source, system
+ */
 	/**
 	 * Generate a pseudo random block of data using several sources. Uses dreadful
 	 * nonsense hackery but is possibly better than using only mt_rand which is
@@ -23,7 +29,7 @@ class Randomness extends CApplicationComponent
 		// numerical values in ps, uptime and iostat ought to be fairly
 		// unpredictable, gather the non-zero digits from those
 		foreach (array('ps', 'uptime', 'iostat') as $cmd) {
-			exec($cmd, $s, $ret);
+			@exec($cmd, $s, $ret);
 			if (is_array($s) && $s && !$ret)
 				foreach ($s as $v)
 					if (false !== preg_match_all('/[1-9]+/', $v, $m) && isset($m[0]))
@@ -43,6 +49,27 @@ class Randomness extends CApplicationComponent
 	}
 
 	/**
+	 * Use session functions to access the system's entropy source
+	 * @static
+	 * @return string 16-byte random binary string or false on error
+	 */
+    public static function sessionBlock() {
+        ini_set('session.entropy_length', 16);
+		if (ini_get('session.entropy_length') != 16)
+			return false;
+		@session_start();
+		@session_regenerate_id();
+		$s = session_id();
+		if (!$s)
+			return false;
+        $r = str_split(md5($s), 8);
+		$s = '';
+		foreach ($r as $v)
+			$s .= pack('V', hexdec($v));
+		return $s;
+    }
+
+	/**
 	 * Generate a string of random raw (binary) bytes, trying to use a
 	 * cryptographically secure source.
 	 * @param int $length number of random bytes to return
@@ -51,7 +78,10 @@ class Randomness extends CApplicationComponent
 	 */
 	public static function randomBytes($length = 8, $http = false) {
 		$s = '';
-		$f = @fopen('/dev/random', 'r');
+		$f = @fopen('/dev/urandom', 'r');
+		if ($f === false)
+			$f = @fopen('/dev/random', 'r');
+
 		if (function_exists('openssl_random_pseudo_bytes')) {
 			$s = openssl_random_pseudo_bytes($length, $safe);
 			if ($s !== false)
@@ -64,12 +94,34 @@ class Randomness extends CApplicationComponent
 					return $s;
 				}
 		}
+		$s = mcrypt_create_iv($length, MCRYPT_RAND);
+		if (function_exists('mcrypt_create_iv')) {
+			$s = mcrypt_create_iv($length, MCRYPT_RAND);
+            if ($s === false) {
+                $s = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+                if ($s === false)
+                    $s = mcrypt_create_iv($length, MCRYPT_DEV_RANDOM);
+            }
+		}
+
 		if ($f !== false) {
 			$s = @fread($f, $length);;
 			fclose($f);
 		}
 		if (mb_strlen($s, 'ISO-8859-1') < $length)
 			$s = false;
+
+		if (!$s) {
+			$s = '';
+			do {
+				$b = self::sessionBlock();
+				if ($b)
+					$s .= $b;
+			} while (mb_strlen($s, 'ISO-8859-1') < $length);
+		}
+		if (mb_strlen($s, 'ISO-8859-1') < $length)
+			$s = false;
+
 		if (!$s && $http) {
 			$r = @file_get_contents(
 				'http://www.random.org/cgi-bin/randbyte?nbytes='
