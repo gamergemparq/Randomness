@@ -94,7 +94,7 @@ class Randomness extends CApplicationComponent
                     return $s;
                 }
         }
-        $s = mcrypt_create_iv($length, MCRYPT_RAND);
+
         if (function_exists('mcrypt_create_iv')) {
             $s = mcrypt_create_iv($length, MCRYPT_RAND);
             if ($s === false) {
