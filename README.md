@@ -55,7 +55,7 @@ brute force checking means your system is open to intruders if you rely on a
 non-iterated message digest such as md5, SHA and the rest.
 
 Blowfish is currently considered pretty good. It is designed to be slow. The
-implementation in PHP's crypt() is easy to use. Set a cost parameter high enough
+implementation in PHP's `crypt()` is easy to use. Set a cost parameter high enough
 to make a brute force attack really slow. I set it so that it takes about 250 ms
 on the production server (a completely arbitrary choice:-).
 
@@ -64,6 +64,11 @@ dictionary size in a rainbow or dictionary attack so large that the attack is no
 feasible. Salts used with the Blowfish hash do not need to be
 cryptographically secure random strings so Randomness's salt generator by default
 uses the casses pseudo-random generator.
+
+Some people advocate resalting every time a user logs in. I think this is only
+useful if you also limit the time interval between user logins, e.g. block an
+account if the user hasn't logged in in more than N weeks.
+
 
 Using PHP's crypt() to store passwords
 --------------------------------------
@@ -81,15 +86,18 @@ hash value.
 
 `crypt()` has function signature `string crypt (string $str, string $salt)` and the
 salt string format determines the hash method. For Blowfish hashing, the format is:
-"$2a$", a two digit cost parameter, "$", and 22 digits from the alphabet
-"./0-9A-Za-z". The cost must be between 04 and 31.
+`"$2a$"`, a two digit cost parameter, `"$"`, and 22 digits from the alphabet
+`"./0-9A-Za-z"`. The cost must be between `04` and `31`.
 
+```php
 crypt('EgzamplPassword', '$2a$10$1qAz2wSx3eDc4rFv5tGb5t')
 >> '$2a$10$1qAz2wSx3eDc4rFv5tGb5e4jVuld5/KF2Kpy.B8D2XoC031sReFGi'
+```
 
 The first 29 characters are the same as the salt string. Anthing appended to the salt
 string argument has no effect on the result:
 
+```php
 crypt('EgzamplPassword', '$2a$10$1qAz2wSx3eDc4rFv5tGb5t12345678901234567890')
 >> '$2a$10$1qAz2wSx3eDc4rFv5tGb5e4jVuld5/KF2Kpy.B8D2XoC031sReFGi'
 
@@ -99,8 +107,9 @@ crypt('EgzamplPassword', '$2a$10$1qAz2wSx3eDc4rFv5tGb5t$2a$10$1qAz2wSx3eDc4rFv5t
 And in particular:
 crypt('EgzamplPassword', '$2a$10$1qAz2wSx3eDc4rFv5tGb5e4jVuld5/KF2Kpy.B8D2XoC031sReFGi')
 >> '$2a$10$1qAz2wSx3eDc4rFv5tGb5e4jVuld5/KF2Kpy.B8D2XoC031sReFGi'
+```
 
-So we can use crypt() to authenticate a user by taking passing the hash value it
+So we can use `crypt()` to authenticate a user by taking passing the hash value it
 gave us when we first generated it back in as a salt when checking a user salt input.
 
 Example
@@ -138,12 +147,12 @@ else
 ```
 
 So there is no need to store the salt in a separate column from the hash value because
-crypt() lets us keep it in the same string as the hash.
+`crypt()` lets us keep it in the same string as the hash.
 
 In Yii
 ------
 
-Randomness::blowfishSalt() generates a salt to use with crypt(), for example:
+`Randomness::blowfishSalt()` generates a salt to use with `crypt()`, for example:
 
     $user = new User;
     $user->email = $form->email;
@@ -163,9 +172,3 @@ To authenticate:
             $this->errorCode = self::ERROR_UNKNOWN_IDENTITY;
         ...
 
-Some people advocate resalting every time a user logs in. I think this is only
-useful if you also limit the time interval between user logins, e.g. block an
-account if the user hasn't logged in in more than N weeks.
-
-Randomness::randomString() might come in handy for generating a random password
-if you ever need to give one to a user.
