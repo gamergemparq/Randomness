@@ -127,7 +127,7 @@ create table user (
 ```
 
 From a user account generation form we have (already sanitized) user input in
-$form->email and $form->password. We henerate the hash:
+$form->email and $form->password. We generate the hash:
 
 ```php
 $password_hash = crypt($form->password, Randomness::blowfishSalt());
