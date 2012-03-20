@@ -110,7 +110,7 @@ crypt('EgzamplPassword', '$2a$10$1qAz2wSx3eDc4rFv5tGb5e4jVuld5/KF2Kpy.B8D2XoC031
 ```
 
 So we can use `crypt()` to authenticate a user by passing the hash value it
-gave us previously back in as a salt when checking a user salt input.
+gave us previously back in as a salt when checking a password input.
 
 Example
 -------
