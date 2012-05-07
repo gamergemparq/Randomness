@@ -121,7 +121,7 @@ Say we have a `user` table like this
 create table user (
   id int not null auto_increment primary key,
   email varchar(255) not null,
-  password_hash char(60) not null,
+  password_hash char(64) not null,
   unique key (email)
 )
 ```
